@@ -19,7 +19,7 @@
     yarn-error.log
     ```
 
-## Creating a GraphQL Sever with GraphQL Yoga
+## Create a GraphQL Sever with GraphQL Yoga
 
 - ```bash
   yarn add nodemon --dev
@@ -43,7 +43,9 @@
 
     const server = new GraphQLServer({});
 
-    server.start(() => console.log('Graphql Server Running'));
+    server.start(() =>
+      console.log('Graphql Server Running and explore http://localhost:4000')
+    );
     ```
 
 - Create `.babelrc`
@@ -53,3 +55,195 @@
       "presets": ["@babel/preset-env"]
     }
     ```
+
+## Create query and resolver
+
+- Create `schema.graphql` and `resolvers.js` on `graphql`
+
+  - `schema.graphql`
+
+    - ```graphql
+      type Query {
+        name: String!, // ! means required
+      }
+      ```
+
+  - `resolvers.js`
+
+    - ```js
+      const resolvers = {
+        Query: {
+          name: () => 'Jin',
+        },
+      };
+
+      export default resolvers;
+      ```
+
+- On `index.js`
+
+  - ```js
+    import resolvers from './graphql/resolvers';
+
+    const server = new GraphQLServer({
+      typeDefs: 'graphql/schema.graphql',
+      resolvers,
+    });
+    ```
+
+- GraphQL on `localhost:4000`
+
+  - ```query
+    query {
+      name
+    }
+    ```
+
+  - the result
+
+    - ```query
+      {
+        "data": {
+          "name": "Jin"
+        }
+      }
+      ```
+
+## Extend schema 1
+
+- `schema.graphql`
+
+  - ```graphql
+    type Jin {
+      name: String!
+      age: Int!
+      gender: String!
+    }
+
+    type Query {
+      person: Jin!
+    }
+    ```
+
+- `resolvers.js`
+
+  - ```js
+    const jin = {
+      name: 'Jin',
+      age: 20,
+      gender: 'male',
+    };
+    const resolvers = {
+      Query: {
+        person: () => jin,
+      },
+    };
+
+    export default resolvers;
+    ```
+
+- GraphQL on `localhost:4000`
+
+  - ```query
+    query {
+      person {
+        name
+        age
+      }
+    }
+    ```
+
+  - the result
+
+    - ```query
+      {
+        "data": {
+          "person": {
+            "name": "Jin",
+            "age": 20
+          }
+        }
+      }
+      ```
+
+## Extend schema 2
+
+- `schema.graphql`
+
+  - ```graphql
+    type Person {
+      id: Int!
+      name: String!
+      age: Int!
+      gender: String!
+    }
+
+    type Query {
+      people: [Person]!
+      person(id: Int!): Person
+    }
+    ```
+
+- Create `/graphql/db.js`
+
+  - ```js
+    export const people = [
+      {
+        id: 0,
+        name: 'Jin',
+        age: 20,
+        gender: 'male',
+      },
+      ...{
+        id: 5,
+        name: 'Jina',
+        age: 20,
+        gender: 'female',
+      },
+    ];
+    ```
+
+- `resolvers.js`
+
+  - ```js
+    import { people } from './db';
+
+    const resolvers = {
+      Query: {
+        people: () => people,
+      },
+    };
+
+    export default resolvers;
+    ```
+
+- GraphQL on `localhost:4000`
+
+  - ```query
+    query {
+      people {
+        id
+        name
+      }
+    }
+    ```
+
+  - the result
+
+    - ```query
+      {
+        "data": {
+          "people": [
+            {
+              "id": 0,
+              "name": "Jin"
+            },
+            ...
+            {
+              "id": 5,
+              "name": "Jina"
+            }
+          ]
+        }
+      }
+      ```
