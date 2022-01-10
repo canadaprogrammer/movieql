@@ -24,3 +24,5 @@ export const people = [
     gender: 'male',
   },
 ];
+
+export const getById = (id) => people.find((person) => person.id === id);

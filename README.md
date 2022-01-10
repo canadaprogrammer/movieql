@@ -247,3 +247,46 @@
         }
       }
       ```
+
+## create queries with arguments
+
+- `db.js`
+
+  - ```js
+    export const getById = (id) => people.find((person) => person.id === id);
+    ```
+
+- `resolvers.js`
+
+  - ```js
+    import { people, getById } from './db';
+
+    const resolvers = {
+      Query: {
+        people: () => people,
+        person: (_, { id }) => getById(id),
+      },
+    };
+    ```
+
+- GraphQL on `localhost:4000`
+
+  - ```query
+    {
+      person(id:0) {
+        name
+      }
+    }
+    ```
+
+  - the result
+
+    - ```query
+      {
+        "data": {
+          "person": {
+            "name": "Jin"
+          }
+        }
+      }
+      ```
