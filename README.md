@@ -290,3 +290,63 @@
         }
       }
       ```
+
+## Create mutations
+
+- On `schema.graphql`
+
+  - ```
+    type Mutation {
+      addPerson(name: String!, age: Int!, gender: String!): Person!
+    }
+    ```
+
+- On `db.js`
+
+  - ```js
+    export const addPerson = (name, age, gender) => {
+      const newPerson = {
+        id: `${people.length}`,
+        name,
+        age,
+        gender,
+      };
+      people.push(newPerson);
+      return newPerson;
+    };
+    ```
+
+- On `resolvers.js`
+
+  - ```js
+    import { ..., addPerson } from './db';
+
+    const resolvers = {
+      ...
+      Mutation: {
+        addPerson: (_, { name, age, gender }) => addPerson(name, age, gender),
+      },
+    };
+    ```
+
+- GraphQL on `localhost:4000`
+
+  - ```query
+    mutation {
+      addPerson (name: "Tester", age: 15, gender: "male") {
+        id
+      }
+    }
+    ```
+
+  - the result
+
+    - ```query
+      {
+        "data": {
+          "addPerson": {
+            "id": "6"
+          }
+        }
+      }
+      ```

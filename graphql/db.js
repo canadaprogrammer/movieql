@@ -1,4 +1,4 @@
-export const people = [
+export let people = [
   {
     id: 0,
     name: 'Jin',
@@ -25,4 +25,18 @@ export const people = [
   },
 ];
 
-export const getById = (id) => people.find((person) => person.id === id);
+export const getPeople = () => people;
+
+export const getById = (id) =>
+  people.find((person) => person.id === String(id));
+
+export const addPerson = (name, age, gender) => {
+  const newPerson = {
+    id: `${people.length}`,
+    name,
+    age,
+    gender,
+  };
+  people.push(newPerson);
+  return newPerson;
+};
