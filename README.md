@@ -1,6 +1,6 @@
 # Movie API with GraphQL
 
-## Problems solved by GraphQL
+## Problems Solved by GraphQL
 
 - Over-fetching and Under-fetching
 
@@ -56,7 +56,7 @@
     }
     ```
 
-## Create query and resolver
+## Create Query and Resolver
 
 - Create `schema.graphql` and `resolvers.js` on `graphql`
 
@@ -109,7 +109,7 @@
       }
       ```
 
-## Extend schema 1
+## Extend Schema 1
 
 - `schema.graphql`
 
@@ -166,7 +166,7 @@
       }
       ```
 
-## Extend schema 2
+## Extend Schema 2
 
 - `schema.graphql`
 
@@ -248,7 +248,7 @@
       }
       ```
 
-## create queries with arguments
+## Create Queries with Arguments
 
 - `db.js`
 
@@ -291,7 +291,7 @@
       }
       ```
 
-## Create mutations
+## Create Mutation
 
 - On `schema.graphql`
 
@@ -306,7 +306,7 @@
   - ```js
     export const addPerson = (name, age, gender) => {
       const newPerson = {
-        id: `${people.length}`,
+        id: people.length,
         name,
         age,
         gender,
@@ -345,8 +345,65 @@
       {
         "data": {
           "addPerson": {
-            "id": "6"
+            "id": 6
           }
+        }
+      }
+      ```
+
+## Delete Mutation
+
+- On `schema.graphql`
+
+  - ```
+    type Mutation {
+      ...
+      delPerson(id: Int!): Boolean!
+    }
+    ```
+
+- On `db.js`
+
+  - ```js
+    export const delById = (id) => {
+      const removedPeople = people.filter((person) => person.id !== String(id));
+      if (people.length > removedPeople.length) {
+        people = removedPeople;
+        return true;
+      } else {
+        return false;
+      }
+    };
+    ```
+
+- On `resolvers.js`
+
+  - ```js
+    import { ..., delById } from './db';
+
+    const resolvers = {
+      ...
+      Mutation: {
+        ... ,
+        delPerson: (_, { id }) => delById(id),
+      },
+    };
+    ```
+
+- GraphQL on `localhost:4000`
+
+  - ```query
+    mutation {
+      delPerson(id: 4)
+    }
+    ```
+
+  - the result
+
+    - ```query
+      {
+        "data": {
+          "delPerson": true
         }
       }
       ```

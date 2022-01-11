@@ -27,12 +27,21 @@ export let people = [
 
 export const getPeople = () => people;
 
-export const getById = (id) =>
-  people.find((person) => person.id === String(id));
+export const getById = (id) => people.find((person) => person.id === id);
+
+export const delById = (id) => {
+  const removedPeople = people.filter((person) => person.id !== id);
+  if (people.length > removedPeople.length) {
+    people = removedPeople;
+    return true;
+  } else {
+    return false;
+  }
+};
 
 export const addPerson = (name, age, gender) => {
   const newPerson = {
-    id: `${people.length}`,
+    id: people.length,
     name,
     age,
     gender,
