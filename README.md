@@ -410,6 +410,8 @@
 
 ## Wrap REST API with GraphQL
 
+### Use `node-fetch`
+
 - `yarn add node-fetch@2.6.5`
 
   - `yarn add node-fetch` installed v3.x, and Error [ERR_REQUIRE_ESM] issued
@@ -501,5 +503,130 @@
               "title": "Days of Reckoning: The Making of Universal Soldier 4",
               "rating": 9.1,
               "summary": ""
+            },
+      ```
+
+### Use `axios`
+
+- `yarn add axios`
+
+- On `db.js`
+
+  - ```js
+    import axios from 'axios';
+    const BASE_URL = 'https://yts.mx/api/v2/';
+    const LIST_MOVIES_URL = `${BASE_URL}list_movies.json`;
+    const MOVIE_DETAILS_URL = `${BASE_URL}movie_details.json`;
+    const MOVIE_SUGGESTIONS_URL = `${BASE_URL}movie_suggestions.json`;
+
+    export const getMovies = async (limit, rating) => {
+      const {
+        data: {
+          data: { movies },
+        },
+      } = await axios(LIST_MOVIES_URL, {
+        params: {
+          limit,
+          minimum_rating: rating,
+        },
+      });
+      return movies;
+    };
+
+    export const getMovie = async (id) => {
+      const {
+        data: {
+          data: { movie },
+        },
+      } = await axios(MOVIE_DETAILS_URL, {
+        params: {
+          movie_id: id,
+        },
+      });
+      return movie;
+    };
+
+    export const getSuggestions = async (id) => {
+      const {
+        data: {
+          data: { movies },
+        },
+      } = await axios(MOVIE_SUGGESTIONS_URL, {
+        params: {
+          movie_id: id,
+        },
+      });
+      return movies;
+    };
+    ```
+
+- On `resolver.js`
+
+  - ```js
+    import { getMovies, getMovie, getSuggestions } from './db';
+
+    const resolvers = {
+      Query: {
+        movies: (_, { rating, limit }) => getMovies(limit, rating),
+        movie: (_, { id }) => getMovie(id),
+        suggestions: (_, { id }) => getSuggestions(id),
+      },
+    };
+
+    export default resolvers;
+    ```
+
+- On `schema.graphql`
+
+  - ```
+    type Movie {
+      id: Int!
+      title: String!
+      rating: Float
+      description_full: String
+      language: String
+      medium_cover_image: String
+      genres: [String]
+    }
+
+    type Query {
+      movies(limit: Int, rating: Int): [Movie]!
+      movie(id: Int!): Movie
+      suggestions(id: Int!): [Movie]!
+    }
+    ```
+
+- GraphQL on `localhost:4000`
+
+  - ```query
+    query {
+      movie(id:38789) {
+        title
+        rating
+        description_full
+      }
+      suggestions(id:38789) {
+        title
+        rating
+        description_full
+      }
+    }
+    ```
+
+  - the result
+
+    - ```query
+      {
+        "data": {
+          "movie": {
+            "title": "Down, But Not Out!",
+            "rating": 9,
+            "description_full": "\"Down, But Not Out!\" captures all the action of four amateur women ..."
+          },
+          "suggestions": [
+            {
+              "title": "Kate: The Making of a Modern Queen",
+              "rating": 6.2,
+              "description_full": "A profile of the Duchess of Cambridge, exploring her transformation ..."
             },
       ```
