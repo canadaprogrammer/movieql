@@ -1,51 +1,30 @@
-export let people = [
-  {
-    id: 0,
-    name: 'Jin',
-    age: 20,
-    gender: 'male',
-  },
-  {
-    id: 1,
-    name: 'Jina',
-    age: 20,
-    gender: 'female',
-  },
-  {
-    id: 2,
-    name: 'Jun',
-    age: 15,
-    gender: 'male',
-  },
-  {
-    id: 3,
-    name: 'Juhee',
-    age: 10,
-    gender: 'male',
-  },
-];
+import fetch from 'node-fetch';
 
-export const getPeople = () => people;
+const API_URL = 'https://yts.mx/api/v2/list_movies.json';
 
-export const getById = (id) => people.find((person) => person.id === id);
-
-export const delById = (id) => {
-  const removedPeople = people.filter((person) => person.id !== id);
-  if (people.length > removedPeople.length) {
-    people = removedPeople;
-    return true;
-  } else {
-    return false;
+const prefix = (count) => {
+  if (count === 1) {
+    return '?';
+  }
+  if (count === 2) {
+    return '&';
   }
 };
-
-export const addPerson = (name, age, gender) => {
-  const newPerson = {
-    id: people.length,
-    name,
-    age,
-    gender,
-  };
-  people.push(newPerson);
-  return newPerson;
+export const getMovies = async (limit, rating) => {
+  let REQUEST_URL = API_URL;
+  let count = 0;
+  if (limit > 0) {
+    count++;
+    REQUEST_URL += prefix(count) + `limit=${limit}`;
+  }
+  if (rating > 0) {
+    count++;
+    REQUEST_URL += prefix(count) + `minimum_rating=${rating}`;
+  }
+  console.log(REQUEST_URL);
+  const response = await fetch(`${REQUEST_URL}`);
+  const {
+    data: { movies },
+  } = await response.json();
+  return movies;
 };

@@ -407,3 +407,99 @@
         }
       }
       ```
+
+## Wrap REST API with GraphQL
+
+- `yarn add node-fetch@2.6.5`
+
+  - `yarn add node-fetch` installed v3.x, and Error [ERR_REQUIRE_ESM] issued
+
+- On `db.js`
+
+  - ```js
+    import fetch from 'node-fetch';
+
+    const API_URL = 'https://yts.mx/api/v2/list_movies.json';
+    const prefix = (count) => {
+      if (count === 1) {
+        return '?';
+      }
+      if (count === 2) {
+        return '&';
+      }
+    };
+    export const getMovies = async (limit, rating) => {
+      let REQUEST_URL = API_URL;
+      let count = 0;
+      if (limit > 0) {
+        count++;
+        REQUEST_URL += prefix(count) + `limit=${limit}`;
+      }
+      if (rating > 0) {
+        count++;
+        REQUEST_URL += prefix(count) + `minimum_rating=${rating}`;
+      }
+      console.log(REQUEST_URL);
+      const response = await fetch(`${REQUEST_URL}`);
+      const {
+        data: { movies },
+      } = await response.json();
+      return movies;
+    };
+    ```
+
+- On `resolvers.js`
+
+  - ```js
+    import { getMovies } from './db';
+
+    const resolvers = {
+      Query: {
+        movies: (_, { limit, rating }) => getMovies(limit, rating),
+      },
+    };
+
+    export default resolvers;
+    ```
+
+- On `schema.graphql`
+
+  - ```
+    type Movie {
+      id: Int!
+      title: String!
+      rating: Float!
+      summary: String!
+      language: String!
+      medium_cover_image: String!
+    }
+
+    type Query {
+      movies(limit: Int, rating: Int): [Movie]!
+    }
+    ```
+
+- GraphQL on `localhost:4000`
+
+  - ```query
+    query {
+      movies(rating:9, limit:3) {
+        title
+        rating
+        summary
+      }
+    }
+    ```
+
+  - the result
+
+    - ```query
+      {
+        "data": {
+          "movies": [
+            {
+              "title": "Days of Reckoning: The Making of Universal Soldier 4",
+              "rating": 9.1,
+              "summary": ""
+            },
+      ```
